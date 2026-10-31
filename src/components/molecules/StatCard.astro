@@ -1,0 +1,33 @@
+---
+/**
+ * StatCard — indicador numérico del panel.
+ *
+ * Capa: molecule
+ * Props: label, value, meta, icon
+ * Efectos: ninguno.
+ */
+import Icon from '@/components/atoms/Icon.astro';
+import type { IconName } from '@/lib/ui/icons';
+
+interface Props {
+  /** Nombre del indicador. */
+  label: string;
+  /** Valor principal. */
+  value: number | string;
+  /** Contexto breve bajo el valor. */
+  meta?: string;
+  /** Icono representativo. */
+  icon: IconName;
+}
+
+const { label, value, meta, icon } = Astro.props;
+---
+
+<article class="stat">
+  <div class="stat__head">
+    <span class="stat__label">{label}</span>
+    <Icon name={icon} size={18} />
+  </div>
+  <p class="stat__value">{value}</p>
+  {meta && <p class="stat__meta">{meta}</p>}
+</article>
