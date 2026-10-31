@@ -1,0 +1,93 @@
+/* ==========================================================================
+   PSA — Inicio de sesión
+   Layout centrado y tarjeta de 400px.
+   ========================================================================== */
+
+.auth {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--space-8) var(--space-4);
+  background: var(--bg-subtle);
+}
+
+.auth__theme {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+}
+
+.auth__card {
+  width: 100%;
+  max-width: 400px;
+  padding: var(--space-8);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.auth__brand {
+  margin-bottom: var(--space-8);
+}
+
+.auth__title {
+  font-size: var(--text-xl);
+  line-height: var(--leading-tight);
+}
+
+.auth__description {
+  margin-top: var(--space-1);
+  color: var(--text-muted);
+  font-size: var(--text-md);
+  line-height: var(--leading-relaxed);
+}
+
+.auth__form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  margin-top: var(--space-6);
+}
+
+.auth__footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-6);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--border-color);
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.auth__footer a {
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.auth__footer a:hover {
+  color: var(--text);
+  text-decoration: underline;
+}
+
+@media (max-width: 479px) {
+  .auth {
+    place-items: start center;
+    padding: 0;
+  }
+
+  .auth__card {
+    max-width: none;
+    min-height: 100vh;
+    padding: var(--space-6);
+    border: 0;
+    border-radius: var(--radius-none);
+  }
+
+  .auth__theme {
+    top: var(--space-3);
+    right: var(--space-3);
+  }
+}

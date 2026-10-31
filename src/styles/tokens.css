@@ -1,0 +1,372 @@
+/* ==========================================================================
+   PSA — Design tokens
+   Fuente de verdad de color, tipografía, espacio, radio y movimiento.
+   Importar una sola vez en el layout global:
+     import '../styles/tokens.css';
+   Tema: claro por defecto, oscuro por prefers-color-scheme o [data-theme].
+   ========================================================================== */
+
+:root {
+  color-scheme: light;
+
+  /* --- Primitivos: neutros (gris plomo) -------------------------------- */
+  /* Escala derivada del gris de marca; tres anclas son exactas. */
+  --psa-white: #ffffff;
+  --psa-gray-50: #f7f8f9;
+  --psa-gray-100: #f0f2f4;
+  --psa-gray-200: #dadcde; /* pantone exacto de marca */
+  --psa-gray-300: #c5cbd1;
+  --psa-gray-400: #8f9ba4;
+  --psa-gray-500: #51626f; /* gris exacto de marca: texto secundario */
+  --psa-gray-600: #3d4b55;
+  --psa-gray-700: #2c3740;
+  --psa-gray-800: #1b232a; /* texto principal */
+  --psa-gray-900: #12181d;
+  --psa-gray-950: #0d1216;
+
+  /* --- Primitivos: rojo de marca -------------------------------------- */
+  /* Escala derivada del rojo base #dc001d, atenuado para la interfaz:
+     el ancla 700 es 3 puntos más oscura y 24 puntos menos saturada. */
+  --psa-red-50: #fdf1f3;
+  --psa-red-100: #fbe0e4;
+  --psa-red-200: #f6bcc4;
+  --psa-red-300: #f08b98;
+  --psa-red-400: #ea4d62;
+  --psa-red-500: #e51f38;
+  --psa-red-600: #ce1c34;
+  --psa-red-700: #b3182b; /* rojo de marca: más oscuro y menos saturado */
+  --psa-red-800: #9e1426; /* hover/active */
+  --psa-red-900: #7a1220;
+  --psa-red-950: #4d0c15;
+
+  /* --- Superficies ----------------------------------------------------- */
+  --bg: var(--psa-white);
+  --bg-subtle: var(--psa-gray-50);
+  --bg-muted: var(--psa-gray-100);
+  --surface: var(--psa-white);
+  --surface-raised: var(--psa-white);
+
+  /* --- Texto ----------------------------------------------------------- */
+  --text: var(--psa-gray-800);
+  --text-muted: var(--psa-gray-500);
+  --text-inverse: var(--psa-white);
+
+  /* --- Marca ----------------------------------------------------------- */
+  --accent: var(--psa-red-700);
+  --accent-hover: var(--psa-red-800);
+  --accent-fill: var(--psa-red-700);
+  --accent-fill-hover: var(--psa-red-800);
+  --accent-soft: var(--psa-red-50);
+  --accent-border: var(--psa-red-200);
+  --on-accent: #ffffff;
+  --focus: var(--psa-red-700);
+
+  /* --- Bordes ---------------------------------------------------------- */
+  --border-color: var(--psa-gray-200);
+  --border-strong-color: var(--psa-gray-300);
+
+  /* --- Semánticos (desaturados, solo estado) --------------------------- */
+  --success: #2f6b4f;
+  --success-soft: #edf5f0;
+  --success-border: #c9e2d6;
+  --success-fill: #2f6b4f;
+  --success-fill-hover: #255a41;
+
+  --warning: #8a5a00;
+  --warning-soft: #fbf3e4;
+  --warning-border: #ebd9b4;
+
+  --danger: #9b1c1c;
+  --danger-soft: #fbecec;
+  --danger-border: #efc4c4;
+  --danger-fill: #9b1c1c;
+  --danger-fill-hover: #841616;
+
+  --info: #2c5a7a;
+  --info-soft: #edf3f7;
+  --info-border: #c6dcea;
+
+  --skeleton: #edeff1;
+
+  /* --- Overlays -------------------------------------------------------- */
+  --scrim: rgb(18 22 26 / 48%);
+  --shadow-overlay:
+    0 12px 32px rgb(18 22 26 / 16%),
+    0 2px 8px rgb(18 22 26 / 8%);
+
+  /* --- Tipografía ------------------------------------------------------ */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+
+  --text-xs: 0.75rem; /* 12px: labels, badges, metadatos */
+  --text-sm: 0.8125rem; /* 13px: tablas, labels de formulario */
+  --text-base: 0.875rem; /* 14px: UI */
+  --text-md: 1rem; /* 16px: lectura */
+  --text-lg: 1.25rem; /* 20px: h3 */
+  --text-xl: 1.5rem; /* 24px: h2, título de página */
+  --text-2xl: 2rem; /* 32px: h1, KPI */
+  --text-3xl: 2.5rem; /* 40px: solo login/portada */
+
+  --leading-tight: 1.25;
+  --leading-snug: 1.4;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+
+  --tracking-tight: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.04em;
+
+  /* --- Espacio (base 4px) ---------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 96px;
+
+  /* --- Radios ---------------------------------------------------------- */
+  --radius-none: 0;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius: 4px; /* único radio de UI */
+  --radius-full: 9999px; /* solo avatar, dot, spinner */
+
+  /* --- Controles ------------------------------------------------------- */
+  --control-sm: 32px;
+  --control-md: 36px;
+  --control-lg: 40px;
+
+  /* --- Layout ---------------------------------------------------------- */
+  --sidebar-w-expanded: 240px;
+  --sidebar-w: var(--sidebar-w-expanded);
+  --topbar-h: 56px;
+  --content-max: 1440px;
+  --form-max: 640px;
+  --page-pad: 24px;
+  --page-pad-lg: 32px;
+
+  /* --- Capas ----------------------------------------------------------- */
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-drawer: 300;
+  --z-modal: 400;
+  --z-toast: 500;
+
+  /* --- Movimiento ------------------------------------------------------ */
+  --duration-fast: 120ms;
+  --duration-base: 180ms;
+  --duration-slow: 240ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+/* ==========================================================================
+   Tema oscuro
+   Se activa con <html data-theme="dark"> o con la preferencia del sistema.
+   ========================================================================== */
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: #0f1216;
+  --bg-subtle: #12171c;
+  --bg-muted: #161b20;
+  --surface: #161b20;
+  --surface-raised: #1d2329;
+
+  --text: #e8eaed;
+  --text-muted: #9ba9b4;
+  --text-inverse: #12161a;
+
+  --accent: #f47a88;
+  --accent-hover: #ff96a2;
+  --accent-fill: var(--psa-red-700);
+  --accent-fill-hover: var(--psa-red-800);
+  --accent-soft: #2c1217;
+  --accent-border: #5a1c26;
+  --on-accent: #ffffff;
+  --focus: #f47a88;
+
+  --border-color: #2c343b;
+  --border-strong-color: #3d464f;
+
+  --success: #7fbfa1;
+  --success-soft: #14231c;
+  --success-border: #24402f;
+  --success-fill: #2f6b4f;
+  --success-fill-hover: #255a41;
+
+  --warning: #e0b25e;
+  --warning-soft: #241e12;
+  --warning-border: #4a3b1d;
+
+  --danger: #f08a8a;
+  --danger-soft: #291517;
+  --danger-border: #512326;
+  --danger-fill: #9b1c1c;
+  --danger-fill-hover: #841616;
+
+  --info: #8fb8d6;
+  --info-soft: #14202a;
+  --info-border: #23404f;
+
+  --skeleton: #1d2329;
+
+  --scrim: rgb(0 0 0 / 64%);
+  --shadow-overlay:
+    0 12px 32px rgb(0 0 0 / 55%),
+    0 2px 8px rgb(0 0 0 / 35%);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: #0f1216;
+    --bg-subtle: #12171c;
+    --bg-muted: #161b20;
+    --surface: #161b20;
+    --surface-raised: #1d2329;
+
+    --text: #e8eaed;
+    --text-muted: #9ba9b4;
+    --text-inverse: #12161a;
+
+    --accent: #f47a88;
+    --accent-hover: #ff96a2;
+    --accent-fill: var(--psa-red-700);
+    --accent-fill-hover: var(--psa-red-800);
+    --accent-soft: #2c1217;
+    --accent-border: #5a1c26;
+    --on-accent: #ffffff;
+    --focus: #f47a88;
+
+    --border-color: #2c343b;
+    --border-strong-color: #3d464f;
+
+    --success: #7fbfa1;
+    --success-soft: #14231c;
+    --success-border: #24402f;
+    --success-fill: #2f6b4f;
+    --success-fill-hover: #255a41;
+
+    --warning: #e0b25e;
+    --warning-soft: #241e12;
+    --warning-border: #4a3b1d;
+
+    --danger: #f08a8a;
+    --danger-soft: #291517;
+    --danger-border: #512326;
+    --danger-fill: #9b1c1c;
+    --danger-fill-hover: #841616;
+
+    --info: #8fb8d6;
+    --info-soft: #14202a;
+    --info-border: #23404f;
+
+    --skeleton: #1d2329;
+
+    --scrim: rgb(0 0 0 / 64%);
+    --shadow-overlay:
+      0 12px 32px rgb(0 0 0 / 55%),
+      0 2px 8px rgb(0 0 0 / 35%);
+  }
+}
+
+/* ==========================================================================
+   Base mínima
+   ========================================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+img,
+svg,
+video {
+  display: block;
+  max-width: 100%;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: var(--accent);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.psa-visually-hidden {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
