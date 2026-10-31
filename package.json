@@ -9,9 +9,24 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "check": "astro check",
+    "check:csp": "node scripts/check-csp.mjs",
+    "budget": "node .opencode/skills/psa-design-standard/scripts/check-budget.mjs"
   },
   "dependencies": {
-    "astro": "^7.4.2"
+    "@astrojs/node": "^11.1.9",
+    "@astrojs/solid-js": "^7.1.1",
+    "astro": "^7.4.2",
+    "fflate": "^0.8.3",
+    "solid-js": "^1.9.17"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "@tailwindcss/vite": "4.3.3",
+    "@types/node": "^26.6.5",
+    "daisyui": "^5.7.50",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.9.3"
   }
 }
