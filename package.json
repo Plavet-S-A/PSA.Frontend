@@ -17,6 +17,7 @@
   "dependencies": {
     "@astrojs/node": "^11.1.9",
     "@astrojs/solid-js": "^7.1.1",
+    "@astrojs/vercel": "^11.0.17",
     "astro": "^7.4.2",
     "fflate": "^0.8.3",
     "solid-js": "^1.9.17"
