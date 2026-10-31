@@ -1,0 +1,25 @@
+---
+/**
+ * ListPageTemplate — estructura común de los módulos de gestión.
+ *
+ * Capa: template
+ * Props: title, description, count
+ * Slots: default (tabla o isla del módulo)
+ * Efectos: ninguno; recibe todo por props.
+ */
+import PageHeader from '@/components/organisms/PageHeader.astro';
+
+interface Props {
+  /** Título de la pantalla. */
+  title: string;
+  /** Descripción del módulo. */
+  description: string;
+  /** Conteo opcional junto al título. */
+  count?: string;
+}
+
+const { title, description, count } = Astro.props;
+---
+
+<PageHeader title={title} description={description} count={count} />
+<slot />

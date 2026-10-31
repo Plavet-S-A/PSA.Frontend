@@ -1,0 +1,164 @@
+---
+/**
+ * AppSidebar — navegación principal y sesión del usuario.
+ *
+ * Capa: organism
+ * Props: user, currentPath
+ * Efectos: envía el cierre de sesión por POST al endpoint del servidor.
+ * Las secciones con un solo módulo se sirven como enlace directo. El resto
+ * inicia plano; si el alto no alcanza, el script lo convierte en acordeón con
+ * un máximo de tres secciones abiertas. Cada rol recibe su propio contexto
+ * inicial y la preferencia se conserva en localStorage.
+ */
+import Brand from '@/components/atoms/Brand.astro';
+import Icon from '@/components/atoms/Icon.astro';
+import { getInitials } from '@/lib/format/name';
+import {
+  LOGOUT_PATH,
+  MAX_OPEN_SECTIONS,
+  PANEL_PATH,
+  defaultOpenSections,
+  visibleSections,
+  isActivePath,
+} from '@/lib/ui/navigation';
+import { ROLE_LABELS } from '@/lib/ui/roles';
+import type { SessionUser } from '@/types/auth';
+
+interface Props {
+  /** Usuario autenticado. */
+  user: SessionUser;
+  /** Ruta actual para marcar el item activo. */
+  currentPath: string;
+}
+
+const { user, currentPath } = Astro.props;
+const initials = getInitials(user.name);
+const roleLabel = ROLE_LABELS[user.role];
+const sections = visibleSections(user.role);
+
+// El menú se sirve plano y completo: HTML usable sin JavaScript. Si el alto
+// disponible no alcanza, el script lo convierte en acordeón antes de que la
+// persona interactúe. `data-default-open` conserva el contexto de cada rol.
+const visibleIds = new Set(sections.map((section) => section.id));
+const defaultOpenKeys = defaultOpenSections(user.role).filter((key) =>
+  visibleIds.has(key),
+);
+const showPanelLink = user.role !== 'estudiante';
+---
+
+<aside class="sidebar" id="app-sidebar" aria-label="Navegación principal">
+  <div class="sidebar__head">
+    <Brand href="/panel" />
+  </div>
+
+  <nav
+    class="sidebar__nav"
+    aria-label="Módulos"
+    data-max-open={MAX_OPEN_SECTIONS}
+    data-default-open={defaultOpenKeys.join(' ')}
+  >
+    {showPanelLink && (
+      <a
+        href={PANEL_PATH}
+        class={[
+          'nav-item',
+          { 'nav-item--active': currentPath === PANEL_PATH },
+        ].filter(Boolean).join(' ')}
+        title="Panel"
+        aria-label="Panel"
+        aria-current={currentPath === PANEL_PATH ? 'page' : undefined}
+      >
+        <Icon name="dashboard" size={18} />
+        <span class="nav-item__label">Panel</span>
+      </a>
+    )}
+
+    {sections.map((section) => {
+      const [onlyItem] = section.items;
+      if (onlyItem && section.items.length === 1) {
+        const active = isActivePath(currentPath, onlyItem.href);
+        return (
+          <a
+            class:list={['nav-item', 'nav-item--standalone', { 'nav-item--active': active }]}
+            href={onlyItem.href}
+            title={onlyItem.label}
+            aria-label={onlyItem.label}
+            aria-current={active ? 'page' : undefined}
+          >
+            <Icon name={onlyItem.icon} size={18} />
+            <span class="nav-item__label">{onlyItem.label}</span>
+          </a>
+        );
+      }
+
+      return (
+        <div class="nav-section" data-section-id={section.id}>
+          <p class="nav-section__heading">{section.label}</p>
+          <button
+            class="nav-section__toggle"
+            type="button"
+            data-section={section.id}
+            aria-expanded="true"
+            aria-controls={`nav-section-${section.id}`}
+            title={section.label}
+          >
+            <span class="nav-section__label">{section.label}</span>
+            <Icon name="chevron-right" size={16} />
+          </button>
+          <div class="nav-collapse">
+            <ul class="nav-list" id={`nav-section-${section.id}`}>
+              {section.items.map((item) => {
+                const active = isActivePath(currentPath, item.href);
+                return (
+                  <li>
+                    <a
+                      class:list={[
+                        'nav-item',
+                        { 'nav-item--active': active },
+                      ]}
+                      href={item.href}
+                      title={item.label}
+                      aria-label={item.label}
+                      aria-current={active ? 'page' : undefined}
+                    >
+                      <Icon name={item.icon} size={18} />
+                      <span class="nav-item__label">{item.label}</span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      );
+    })}
+  </nav>
+
+  <div class="sidebar__foot">
+    <div class="user-chip" title={`${user.name} · ${roleLabel}`}>
+      <span class="avatar" aria-hidden="true">{initials}</span>
+      <div class="user-chip__text">
+        <p class="user-chip__name">{user.name}</p>
+        <p class="user-chip__role">{roleLabel}</p>
+      </div>
+    </div>
+
+    <form method="post" action={LOGOUT_PATH}>
+      <button
+        class="btn btn-ghost btn-sm sidebar__logout"
+        type="submit"
+        title="Cerrar sesión"
+        aria-label="Cerrar sesión"
+      >
+        <Icon name="logout" size={16} />
+        <span class="sidebar__logout-label">Cerrar sesión</span>
+      </button>
+    </form>
+  </div>
+</aside>
+
+<script>
+  import { initSidebarAccordion } from '@/lib/ui/sidebar-accordion';
+
+  initSidebarAccordion();
+</script>

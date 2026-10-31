@@ -1,0 +1,35 @@
+---
+/**
+ * PageHeader — título, descripción y acciones de una pantalla.
+ *
+ * Capa: organism
+ * Props: title, description, count
+ * Slots: default (acciones opcionales)
+ * Efectos: ninguno.
+ */
+interface Props {
+  /** Título principal de la pantalla. */
+  title: string;
+  /** Explicación breve bajo el título. */
+  description?: string;
+  /** Conteo o contexto junto al título. */
+  count?: string;
+}
+
+const { title, description, count } = Astro.props;
+---
+
+<header class="page-header">
+  <div>
+    <h1 class="page-header__title">
+      {title}
+      {count && <span class="page-header__count"> · {count}</span>}
+    </h1>
+    {description && <p class="page-header__description">{description}</p>}
+  </div>
+  {Astro.slots.has('default') && (
+    <div class="page-header__actions">
+      <slot />
+    </div>
+  )}
+</header>
