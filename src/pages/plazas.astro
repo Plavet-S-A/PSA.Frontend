@@ -1,0 +1,64 @@
+---
+import PlazaWorkspace from '@/components/organisms/PlazaWorkspace';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { defaultPlazaAssignments } from '@/lib/catalog/plaza-assignments';
+import { plazasConfig, plazasRows } from '@/lib/catalog/plazas';
+import { TALLER_NOMBRES } from '@/lib/catalog/options';
+import { pluralize } from '@/lib/format/text';
+import { capabilitiesFor, visibleTalleres } from '@/lib/ui/permissions';
+import { ROLE_LABELS } from '@/lib/ui/roles';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion');
+
+const capabilities = capabilitiesFor(user.role);
+const talleres = visibleTalleres(user.role, TALLER_NOMBRES, user.id);
+// El alcance se aplica antes de enviar datos al navegador: tutoría empresarial
+// solo recibe las plazas de sus talleres.
+const scopedRows = plazasRows.filter((row) => talleres.includes(String(row.taller)));
+const scopedPlazaIds = new Set(scopedRows.map((row) => row.id));
+const scopedAssignments = defaultPlazaAssignments().filter((assignment) =>
+  scopedPlazaIds.has(assignment.plazaId),
+);
+const total = scopedRows.length;
+const description =
+  user.role === 'tutor-empresarial'
+    ? talleres.length === 1
+      ? `Consulta la plaza de ${talleres[0]} y solicita plazas nuevas para tu centro de trabajo.`
+      : 'Consulta las plazas de tu empresa y solicita plazas nuevas para tus talleres.'
+    : talleres.length === 1
+      ? `Consulta o administra las plazas de ${talleres[0]}.`
+      : 'Selecciona un taller para consultar o administrar sus plazas.';
+const guidance =
+  user.role === 'supervisor'
+    ? 'Como supervisor institucional consultas las plazas y sus estudiantes asignados sin modificar la información.'
+    : user.role === 'vinculador'
+      ? 'Como vinculador administras las plazas de cada taller, su vinculación con los centros de trabajo y la asignación de estudiantes.'
+      : user.role === 'tutor-empresarial'
+        ? 'Como tutor empresarial consultas las plazas de tu empresa y puedes solicitar plazas nuevas con sus características. Cada solicitud entra con estado En revisión para que vinculación la autorice.'
+        : 'Como coordinación puedes consultar, administrar y asignar estudiantes a las plazas de todos los talleres.';
+---
+
+<AppLayout user={user} title={plazasConfig.plural} currentPath="/plazas">
+  <ListPageTemplate
+    title={plazasConfig.plural}
+    description={description}
+    count={pluralize(total, 'plaza', 'plazas')}
+  >
+    <PlazaWorkspace
+      client:idle
+      initialRows={scopedRows}
+      initialAssignments={scopedAssignments}
+      canManage={capabilities.canManageCatalogs}
+      canRequest={capabilities.canRequestPlaza}
+      requesterName={user.name}
+      partialSave={talleres.length < TALLER_NOMBRES.length}
+      talleres={talleres}
+      roleLabel={ROLE_LABELS[user.role]}
+      guidance={guidance}
+    />
+  </ListPageTemplate>
+</AppLayout>

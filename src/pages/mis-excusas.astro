@@ -1,0 +1,35 @@
+---
+/**
+ * Mis excusas — envío y seguimiento de incidencias del estudiante.
+ *
+ * Capa: página
+ * Solo entrega a la isla las excusas propias; la revisión vive en `/excusas`.
+ */
+import StudentExcuses from '@/components/organisms/StudentExcuses';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { studentProfile } from '@/lib/catalog/student-context';
+import { capabilitiesFor } from '@/lib/ui/permissions';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion?next=/mis-excusas');
+if (user.role !== 'estudiante') return Astro.redirect('/excusas');
+if (!capabilitiesFor(user.role).canRequestExcuses) return Astro.redirect('/mi-pasantia');
+
+const perfil = studentProfile(user.studentId, user.name);
+---
+
+<AppLayout user={user} title="Mis excusas" currentPath="/mis-excusas">
+  <ListPageTemplate
+    title="Mis excusas"
+    description="Envía ausencias, retrasos o problemas de documentación y consulta la respuesta de tu tutor."
+  >
+    <StudentExcuses
+      client:load
+      initialRows={perfil.excusas}
+      studentName={perfil.nombre}
+    />
+  </ListPageTemplate>
+</AppLayout>

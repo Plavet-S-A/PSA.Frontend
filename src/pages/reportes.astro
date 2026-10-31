@@ -1,0 +1,13 @@
+---
+import ReportesWorkspace from '@/components/organisms/ReportesWorkspace';
+import AppLayout from '@/layouts/AppLayout.astro';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion?next=/reportes');
+---
+
+<AppLayout user={user} title="Reportes" currentPath="/reportes">
+  <ReportesWorkspace client:load />
+</AppLayout>

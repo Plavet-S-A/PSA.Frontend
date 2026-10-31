@@ -1,0 +1,247 @@
+---
+/**
+ * Mi pasantía — resumen personal del estudiante autenticado.
+ *
+ * Capa: página
+ * Muestra la práctica asignada, el tutor empresarial y accesos a documentos,
+ * calificaciones y excusas. Solo consulta los datos de la propia persona.
+ */
+import Badge from '@/components/atoms/Badge.astro';
+import Icon from '@/components/atoms/Icon.astro';
+import StatCard from '@/components/molecules/StatCard.astro';
+import PageHeader from '@/components/organisms/PageHeader.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { studentProfile } from '@/lib/catalog/student-context';
+import { formatDateInput } from '@/lib/format/date';
+import { pluralize } from '@/lib/format/text';
+import { statusTone } from '@/lib/ui/status';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion');
+if (user.role !== 'estudiante') return Astro.redirect('/panel');
+
+const perfil = studentProfile(user.studentId, user.name);
+const pasantia = perfil.pasantia;
+const evaluacion = perfil.evaluacion;
+const tutor = perfil.tutorEmpresarial;
+const pendientes = perfil.documentos.filter(
+  (row) => String(row.estado) !== 'Validado',
+).length;
+const excusasAbiertas = perfil.excusas.filter(
+  (row) => String(row.estado) === 'Pendiente',
+).length;
+const calificacion = Number(evaluacion?.promedio ?? 0);
+
+const accesos = [
+  {
+    href: '/mis-documentos',
+    label: 'Mis documentos',
+    hint: 'Sube y consulta tus entregas',
+    count: perfil.documentos.length,
+    icon: 'file' as const,
+  },
+  {
+    href: '/mis-calificaciones',
+    label: 'Mis calificaciones',
+    hint: evaluacion ? `Promedio ${calificacion}` : 'Aún sin evaluación',
+    count: evaluacion ? 1 : 0,
+    icon: 'chart' as const,
+  },
+  {
+    href: '/mis-excusas',
+    label: 'Mis excusas',
+    hint: 'Envía y da seguimiento',
+    count: excusasAbiertas,
+    icon: 'clipboard' as const,
+  },
+];
+---
+
+<AppLayout user={user} title="Mi pasantía" currentPath="/mi-pasantia">
+  <PageHeader
+    title="Mi pasantía"
+    description={`Hola, ${perfil.nombre}. Aquí está el resumen de tu práctica profesional.`}
+  />
+
+  <section class="stat-grid" aria-label="Indicadores de tu pasantía">
+    <StatCard
+      label="Horas realizadas"
+      value={Number(pasantia?.horas_acumuladas ?? 0)}
+      meta="de 480 horas del plan"
+      icon="route"
+    />
+    <StatCard
+      label="Avance"
+      value={`${Number(pasantia?.avance ?? 0)}%`}
+      meta={pasantia ? String(pasantia.etapa) : 'Sin pasantía'}
+      icon="chart"
+    />
+    <StatCard
+      label="Calificación"
+      value={calificacion > 0 ? calificacion : '—'}
+      meta={evaluacion ? String(evaluacion.estado) : 'Pendiente de captura'}
+      icon="graduation"
+    />
+    <StatCard
+      label="Documentos por validar"
+      value={pendientes}
+      meta={`${pluralize(perfil.documentos.length, 'documento', 'documentos')} en tu expediente`}
+      icon="file"
+    />
+  </section>
+
+  <div class="dashboard-grid">
+    <section class="panel" aria-labelledby="pasantia-title">
+      <div class="panel__head">
+        <h2 class="panel__title" id="pasantia-title">Pasantía asignada</h2>
+        {pasantia && (
+          <Badge tone={statusTone(String(pasantia.estado))}>{pasantia.estado}</Badge>
+        )}
+      </div>
+      {pasantia ? (
+        <dl class="detail-list">
+          <dt>Plaza</dt>
+          <dd>{pasantia.plaza}</dd>
+          <dt>Centro de trabajo</dt>
+          <dd>{pasantia.centroTrabajo}</dd>
+          <dt>Taller</dt>
+          <dd>{pasantia.taller}</dd>
+          <dt>Etapa</dt>
+          <dd>{pasantia.etapa}</dd>
+          <dt>Horas acumuladas</dt>
+          <dd>{Number(pasantia.horas_acumuladas ?? 0)} horas</dd>
+          <dt>Inicio</dt>
+          <dd>{formatDateInput(String(perfil.estudiante?.fecha_inicio_pasantia ?? '')) || 'Sin registrar'}</dd>
+          <dt>Fin estimado</dt>
+          <dd>{formatDateInput(String(perfil.estudiante?.fecha_fin_pasantia ?? '')) || 'Sin registrar'}</dd>
+          <dt>Póliza</dt>
+          <dd class="mono">{pasantia.poliza || 'Sin registrar'}</dd>
+        </dl>
+      ) : (
+        <div class="detail-empty">
+          <p class="detail-empty__title">Aún no tienes una pasantía asignada</p>
+          <p class="detail-empty__text">
+            Cuando vinculación registre tu plaza, aquí verás el centro de trabajo,
+            las horas y el avance de tu práctica. Mientras tanto puedes enviar
+            excusas y revisar tus documentos.
+          </p>
+        </div>
+      )}
+    </section>
+
+    <section class="panel" aria-labelledby="tutor-title">
+      <div class="panel__head">
+        <h2 class="panel__title" id="tutor-title">Tu tutor empresarial</h2>
+      </div>
+      {tutor ? (
+        <dl class="detail-list">
+          <dt>Nombre</dt>
+          <dd>{tutor.nombreCompleto}</dd>
+          <dt>Taller</dt>
+          <dd>{tutor.taller}</dd>
+          <dt>Correo</dt>
+          <dd>
+            <a class="panel__link" href={`mailto:${tutor.email_contacto}`}>
+              {tutor.email_contacto}
+            </a>
+          </dd>
+          <dt>Teléfono</dt>
+          <dd>{tutor.telefono}</dd>
+        </dl>
+      ) : (
+        <div class="detail-empty">
+          <p class="detail-empty__title">Todavía no se asigna un tutor empresarial</p>
+          <p class="detail-empty__text">
+            El centro de trabajo confirmará a la persona que te acompañará durante
+            la práctica.
+          </p>
+        </div>
+      )}
+    </section>
+  </div>
+
+  <section class="panel" aria-labelledby="accesos-title">
+    <div class="panel__head">
+      <h2 class="panel__title" id="accesos-title">Accesos rápidos</h2>
+    </div>
+    <ul class="module-list">
+      {accesos.map((acceso) => (
+        <li>
+          <a class="module-list__item" href={acceso.href}>
+            <span class="module-list__icon"><Icon name={acceso.icon} size={16} /></span>
+            <span class="module-list__text">
+              <span class="module-list__name">{acceso.label}</span>
+              <span class="module-list__hint">{acceso.hint}</span>
+            </span>
+            <span class="module-list__count">{acceso.count}</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <div
+    hidden
+    data-student-summary
+    data-name={perfil.nombre}
+    data-documentos={JSON.stringify(perfil.documentos)}
+    data-excusas={JSON.stringify(perfil.excusas)}
+  >
+  </div>
+</AppLayout>
+
+<script>
+  import { documentacionConfig } from '@/lib/catalog/documentacion';
+  import { excusasConfig } from '@/lib/catalog/excusas';
+  import { pluralize } from '@/lib/format/text';
+  import { loadResourceRows } from '@/lib/storage/resource-store';
+  import type { ResourceRow } from '@/types/resource';
+
+  const root = document.querySelector<HTMLElement>('[data-student-summary]');
+  if (root) {
+    const name = root.dataset.name ?? '';
+    const ownDocs = (rows: readonly ResourceRow[]) =>
+      rows.filter((row) => String(row.estudiante) === name);
+    const documentos = ownDocs(
+      loadResourceRows(
+        documentacionConfig.id,
+        JSON.parse(root.dataset.documentos ?? '[]') as ResourceRow[],
+      ),
+    );
+    const excusas = ownDocs(
+      loadResourceRows(
+        excusasConfig.id,
+        JSON.parse(root.dataset.excusas ?? '[]') as ResourceRow[],
+      ),
+    );
+    const pendientes = documentos.filter(
+      (row) => String(row.estado) !== 'Validado',
+    ).length;
+    const abiertas = excusas.filter(
+      (row) => String(row.estado) === 'Pendiente',
+    ).length;
+
+    const setCount = (href: string, count: number) => {
+      const target = document.querySelector(
+        `.module-list__item[href="${href}"] .module-list__count`,
+      );
+      if (target) target.textContent = String(count);
+    };
+    setCount('/mis-documentos', documentos.length);
+    setCount('/mis-excusas', abiertas);
+
+    const card = [...document.querySelectorAll<HTMLElement>('.stat')].find(
+      (item) =>
+        item.querySelector('.stat__label')?.textContent?.trim() ===
+        'Documentos por validar',
+    );
+    const value = card?.querySelector('.stat__value');
+    if (value) value.textContent = String(pendientes);
+    const meta = card?.querySelector('.stat__meta');
+    if (meta) {
+      meta.textContent = `${pluralize(documentos.length, 'documento', 'documentos')} en tu expediente`;
+    }
+  }
+</script>

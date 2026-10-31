@@ -1,0 +1,39 @@
+---
+import ResourceManager from '@/components/organisms/ResourceManager';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import {
+  tutoresEmpresarialesConfig,
+  tutoresEmpresarialesRows,
+  withTutorEmpresarialEmpresa,
+} from '@/lib/catalog/tutores-empresariales';
+import { capabilitiesFor } from '@/lib/ui/permissions';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion');
+
+const capabilities = capabilitiesFor(user.role);
+const initialRows = tutoresEmpresarialesRows.map((row) =>
+  withTutorEmpresarialEmpresa(row),
+);
+---
+
+<AppLayout
+  user={user}
+  title={tutoresEmpresarialesConfig.plural}
+  currentPath="/tutores-empresariales"
+>
+  <ListPageTemplate
+    title={tutoresEmpresarialesConfig.plural}
+    description={tutoresEmpresarialesConfig.description}
+  >
+    <ResourceManager
+      client:idle
+      config={tutoresEmpresarialesConfig}
+      initialRows={initialRows}
+      readOnly={!capabilities.canManageCatalogs}
+    />
+  </ListPageTemplate>
+</AppLayout>

@@ -1,0 +1,28 @@
+---
+import ResourceManager from '@/components/organisms/ResourceManager';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { procesoPasantiaConfig, procesoPasantiaRows } from '@/lib/catalog/proceso-pasantia';
+import { capabilitiesFor } from '@/lib/ui/permissions';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion');
+
+const capabilities = capabilitiesFor(user.role);
+---
+
+<AppLayout user={user} title={procesoPasantiaConfig.plural} currentPath="/proceso-pasantia">
+  <ListPageTemplate
+    title={procesoPasantiaConfig.plural}
+    description={procesoPasantiaConfig.description}
+  >
+    <ResourceManager
+      client:idle
+      config={procesoPasantiaConfig}
+      initialRows={procesoPasantiaRows}
+      readOnly={!capabilities.canManageProcess}
+    />
+  </ListPageTemplate>
+</AppLayout>

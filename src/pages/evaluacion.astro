@@ -1,0 +1,80 @@
+---
+import EvaluationWorkspace from '@/components/organisms/EvaluationWorkspace';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { evaluacionConfig, evaluacionRows } from '@/lib/catalog/evaluacion';
+import { TALLER_NOMBRES } from '@/lib/catalog/options';
+import {
+  assignedStudentNamesForTalleres,
+  defaultPlazaAssignments,
+} from '@/lib/catalog/plaza-assignments';
+import { pluralize } from '@/lib/format/text';
+import { capabilitiesFor, visibleTalleres } from '@/lib/ui/permissions';
+import { ROLE_LABELS } from '@/lib/ui/roles';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion');
+// El estudiante consulta su evaluación en su propia pantalla.
+if (user.role === 'estudiante') return Astro.redirect('/mis-calificaciones');
+
+const capabilities = capabilitiesFor(user.role);
+const talleres = visibleTalleres(user.role, TALLER_NOMBRES, user.id);
+const assignmentScope = user.role === 'tutor-empresarial';
+const assignedStudentNames = assignmentScope
+  ? assignedStudentNamesForTalleres(defaultPlazaAssignments(), talleres)
+  : [];
+const assignedStudents = new Set(assignedStudentNames);
+// Solo se envían al navegador las evaluaciones del alcance del rol. El tutor
+// empresarial recibe únicamente a estudiantes de las plazas de sus talleres.
+const scopedRows = evaluacionRows.filter(
+  (row) =>
+    talleres.includes(String(row.taller)) &&
+    (!assignmentScope || assignedStudents.has(String(row.estudiante))),
+);
+const total = scopedRows.length;
+const description = assignmentScope
+  ? 'Califica a los estudiantes asignados a las plazas de tus talleres.'
+  : talleres.length === 1
+    ? `Consulta y captura las calificaciones de ${talleres[0]}.`
+    : 'Selecciona un taller para consultar, capturar calificaciones y generar documentos con plantillas.';
+const guidance = {
+  coordinador:
+    'Como coordinación puedes consultar y capturar calificaciones de todos los talleres.',
+  vinculador:
+    'Como vinculador consultas las calificaciones por taller; la captura corresponde a los tutores.',
+  tutor: 'Como tutor académico calificas a los estudiantes de tus talleres.',
+  'tutor-empresarial':
+    'Como tutor empresarial calificas a los estudiantes asignados a las plazas de tus talleres.',
+  supervisor:
+    'Como supervisor institucional consultas las calificaciones organizadas por taller.',
+  estudiante:
+    'Como estudiante consultas tus calificaciones en «Mis calificaciones».',
+}[user.role];
+---
+
+<AppLayout user={user} title={evaluacionConfig.plural} currentPath="/evaluacion">
+  <ListPageTemplate
+    title={evaluacionConfig.plural}
+    description={description}
+    count={
+      assignmentScope
+        ? undefined
+        : pluralize(total, 'evaluación', 'evaluaciones')
+    }
+  >
+    <EvaluationWorkspace
+      client:idle
+      initialRows={scopedRows}
+      canGrade={capabilities.canGrade}
+      talleres={talleres}
+      roleLabel={ROLE_LABELS[user.role]}
+      guidance={guidance}
+      partialSave={talleres.length < TALLER_NOMBRES.length || assignmentScope}
+      assignmentScope={assignmentScope}
+      assignedStudentNames={assignedStudentNames}
+      groupByPlaza={assignmentScope}
+    />
+  </ListPageTemplate>
+</AppLayout>

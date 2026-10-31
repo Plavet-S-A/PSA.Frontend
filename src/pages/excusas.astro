@@ -1,0 +1,55 @@
+---
+/**
+ * Excusas — bandeja de revisión para tutores, vinculación y coordinación.
+ *
+ * Capa: página
+ * Los estudiantes envían las excusas desde «Mis excusas»; esta pantalla solo
+ * permite consultarlas y, según el rol, aceptarlas o rechazarlas.
+ */
+import ExcusesReview from '@/components/organisms/ExcusesReview';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { excusasRows } from '@/lib/catalog/excusas';
+import { capabilitiesFor } from '@/lib/ui/permissions';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion?next=/excusas');
+
+const capabilities = capabilitiesFor(user.role);
+// Vinculación y tutoría académica consultan todas las excusas, aunque no estén
+// dirigidas a su rol. La tutoría empresarial conserva el filtro de su destino.
+const scope =
+  user.role === 'tutor-empresarial' ? 'Tutor empresarial' : null;
+// La revisión sí se limita al destino del tutor; coordinación y vinculación
+// pueden resolver cualquier excusa.
+const reviewScope =
+  user.role === 'tutor'
+    ? 'Tutor académico'
+    : user.role === 'tutor-empresarial'
+      ? 'Tutor empresarial'
+      : null;
+const scopedRows = scope
+  ? excusasRows.filter((row) => String(row.tutor) === scope)
+  : excusasRows;
+const description =
+  user.role === 'tutor'
+    ? 'Consulta todas las incidencias y resuelve las dirigidas a tu rol.'
+    : capabilities.canReviewExcuses
+      ? 'Revisa las incidencias enviadas por los estudiantes y resuelve cada caso.'
+      : 'Consulta las incidencias enviadas por los estudiantes y su estado.';
+---
+
+<AppLayout user={user} title="Excusas" currentPath="/excusas">
+  <ListPageTemplate title="Excusas" description={description}>
+    <ExcusesReview
+      client:load
+      initialRows={scopedRows}
+      canReview={capabilities.canReviewExcuses}
+      scope={scope}
+      reviewScope={reviewScope}
+      reviewerName={user.name}
+    />
+  </ListPageTemplate>
+</AppLayout>

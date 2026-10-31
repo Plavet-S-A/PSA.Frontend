@@ -1,0 +1,25 @@
+---
+import ResourceManager from '@/components/organisms/ResourceManager';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { usuariosConfig, usuariosRows } from '@/lib/catalog/usuarios';
+import { capabilitiesFor } from '@/lib/ui/permissions';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion');
+
+const capabilities = capabilitiesFor(user.role);
+---
+
+<AppLayout user={user} title={usuariosConfig.plural} currentPath="/usuarios">
+  <ListPageTemplate title={usuariosConfig.plural} description={usuariosConfig.description}>
+    <ResourceManager
+      client:idle
+      config={usuariosConfig}
+      initialRows={usuariosRows}
+      readOnly={!capabilities.canManageCatalogs}
+    />
+  </ListPageTemplate>
+</AppLayout>

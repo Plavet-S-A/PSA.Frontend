@@ -1,0 +1,166 @@
+---
+/**
+ * Mis calificaciones — evaluación personal del estudiante.
+ *
+ * Capa: página
+ * Presenta la evaluación académica, la del centro de trabajo y las
+ * observaciones. Solo lee la fila que coincide con la sesión.
+ */
+import Badge from '@/components/atoms/Badge.astro';
+import StatCard from '@/components/molecules/StatCard.astro';
+import PageHeader from '@/components/organisms/PageHeader.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { studentProfile } from '@/lib/catalog/student-context';
+import { statusTone } from '@/lib/ui/status';
+import type { ResourceRow } from '@/types/resource';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion?next=/mis-calificaciones');
+if (user.role !== 'estudiante') return Astro.redirect('/evaluacion');
+
+const perfil = studentProfile(user.studentId, user.name);
+const evaluacion = perfil.evaluacion;
+const promedio = Number(evaluacion?.promedio ?? 0);
+
+/** Criterios académicos con su llave en la fila. */
+const criteriosAcademicos = [
+  { key: 'asistencia', label: 'Asistencia' },
+  { key: 'desempeno', label: 'Desempeño' },
+  { key: 'disponibilidad', label: 'Disponibilidad' },
+  { key: 'responsabilidad', label: 'Responsabilidad' },
+  { key: 'limpieza', label: 'Limpieza' },
+  { key: 'trabajo_equipo', label: 'Trabajo en equipo' },
+  { key: 'resolucion_problemas', label: 'Resolución de problemas' },
+];
+
+/** Criterios evaluados por el centro de trabajo. */
+const criteriosCentro = [
+  { key: 'espacio_trabajo', label: 'Espacio de trabajo' },
+  { key: 'asignacion_tareas', label: 'Asignación de tareas' },
+  { key: 'disponibilidad_centro', label: 'Disponibilidad del centro' },
+];
+
+/** Valor numérico de un criterio. */
+function puntaje(row: ResourceRow | undefined, key: string): number {
+  return Number(row?.[key] ?? 0);
+}
+
+const promedioCentro = criteriosCentro.length
+  ? Math.round(
+      criteriosCentro.reduce((total, criterio) => total + puntaje(evaluacion, criterio.key), 0) /
+        criteriosCentro.length,
+    )
+  : 0;
+
+/** Fecha ISO corta para indicadores compactos. */
+function fechaCorta(iso: unknown): string {
+  const [year, month, day] = String(iso ?? '').split('-');
+  return year && month && day ? `${day}/${month}/${year}` : '—';
+}
+---
+
+<AppLayout user={user} title="Mis calificaciones" currentPath="/mis-calificaciones">
+  <PageHeader
+    title="Mis calificaciones"
+    description="Resultado de tu evaluación académica y del centro de trabajo."
+    count={evaluacion ? String(evaluacion.estado) : 'Sin evaluación'}
+  />
+
+  {evaluacion ? (
+    <>
+      <section class="stat-grid" aria-label="Resumen de tu evaluación">
+        <StatCard
+          label="Promedio general"
+          value={promedio}
+          meta="Escala de 0 a 100"
+          icon="chart"
+        />
+        <StatCard
+          label="Evaluación del centro"
+          value={promedioCentro}
+          meta={fechaCorta(evaluacion.fecha_centro)}
+          icon="building"
+        />
+        <StatCard
+          label="Resultados de aprendizaje"
+          value={String(evaluacion.ra ?? '—')}
+          meta="Cubiertos en la práctica"
+          icon="book"
+        />
+        <StatCard
+          label="Fecha de evaluación"
+          value={fechaCorta(evaluacion.fecha)}
+          meta={String(evaluacion.taller ?? '')}
+          icon="clipboard"
+        />
+      </section>
+
+      <div class="dashboard-grid">
+        <section class="panel" aria-labelledby="academica-title">
+          <div class="panel__head">
+            <h2 class="panel__title" id="academica-title">Evaluación académica</h2>
+            <Badge tone={statusTone(String(evaluacion.estado))}>
+              {evaluacion.estado}
+            </Badge>
+          </div>
+          <dl class="detail-list">
+            {criteriosAcademicos.map((criterio) => (
+              <>
+                <dt>{criterio.label}</dt>
+                <dd>{puntaje(evaluacion, criterio.key)} / 100</dd>
+              </>
+            ))}
+            <dt>Promedio</dt>
+            <dd><strong>{promedio} / 100</strong></dd>
+          </dl>
+        </section>
+
+        <section class="panel" aria-labelledby="centro-title">
+          <div class="panel__head">
+            <h2 class="panel__title" id="centro-title">Evaluación del centro</h2>
+            <span class="workspace__meta">{evaluacion.plaza}</span>
+          </div>
+          <dl class="detail-list">
+            {criteriosCentro.map((criterio) => (
+              <>
+                <dt>{criterio.label}</dt>
+                <dd>{puntaje(evaluacion, criterio.key)} / 100</dd>
+              </>
+            ))}
+            <dt>Promedio del centro</dt>
+            <dd><strong>{promedioCentro} / 100</strong></dd>
+          </dl>
+        </section>
+      </div>
+
+      <div class="dashboard-grid dashboard-grid--single">
+        <section class="panel" aria-labelledby="observaciones-title">
+          <div class="panel__head">
+            <h2 class="panel__title" id="observaciones-title">Observaciones</h2>
+          </div>
+          <dl class="detail-list">
+            <dt>Evaluación académica</dt>
+            <dd>{evaluacion.observaciones || 'Sin observaciones.'}</dd>
+            <dt>Centro de trabajo</dt>
+            <dd>{evaluacion.observaciones_centro || 'Sin observaciones.'}</dd>
+          </dl>
+        </section>
+      </div>
+    </>
+  ) : (
+    <section class="panel" aria-labelledby="sin-evaluacion-title">
+      <div class="panel__head">
+        <h2 class="panel__title" id="sin-evaluacion-title">Aún no tienes evaluación</h2>
+      </div>
+      <div class="detail-empty">
+        <p class="detail-empty__title">Tu evaluación aparecerá cuando cierre el periodo</p>
+        <p class="detail-empty__text">
+          El tutor académico y el centro de trabajo capturan los criterios al final
+          del periodo. Si tienes dudas sobre las fechas, consulta con tu tutor.
+        </p>
+      </div>
+    </section>
+  )}
+</AppLayout>

@@ -1,0 +1,41 @@
+---
+/**
+ * Mis documentos — expediente del estudiante autenticado.
+ *
+ * Capa: página
+ * Solo envía al navegador las filas propias. La isla comparte el módulo de
+ * documentación para que las entregas aparezcan también ante el tutor.
+ */
+import StudentDocuments from '@/components/organisms/StudentDocuments';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { TIPO_DOCUMENTO_OPCIONES } from '@/lib/catalog/options';
+import { studentProfile } from '@/lib/catalog/student-context';
+import { capabilitiesFor } from '@/lib/ui/permissions';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion?next=/mis-documentos');
+if (user.role !== 'estudiante') return Astro.redirect('/documentacion');
+if (!capabilitiesFor(user.role).canSubmitDocuments) return Astro.redirect('/mi-pasantia');
+
+const perfil = studentProfile(user.studentId, user.name);
+---
+
+<AppLayout user={user} title="Mis documentos" currentPath="/mis-documentos">
+  <ListPageTemplate
+    title="Mis documentos"
+    description="Sube tus entregas en PDF y da seguimiento a la validación."
+  >
+    <StudentDocuments
+      client:load
+      initialRows={perfil.documentos}
+      studentName={perfil.nombre}
+      studentCode={perfil.idEstudiante}
+      taller={perfil.taller}
+      tallerCode={perfil.idTaller}
+      tipos={TIPO_DOCUMENTO_OPCIONES}
+    />
+  </ListPageTemplate>
+</AppLayout>

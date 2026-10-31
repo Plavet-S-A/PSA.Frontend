@@ -1,0 +1,25 @@
+---
+import ResourceManager from '@/components/organisms/ResourceManager';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { cierrePasantiaConfig, cierrePasantiaRows } from '@/lib/catalog/cierre-pasantia';
+import { capabilitiesFor } from '@/lib/ui/permissions';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion?next=/cierre-pasantia');
+
+const capabilities = capabilitiesFor(user.role);
+---
+
+<AppLayout user={user} title={cierrePasantiaConfig.plural} currentPath="/cierre-pasantia">
+  <ListPageTemplate title={cierrePasantiaConfig.plural} description={cierrePasantiaConfig.description}>
+    <ResourceManager
+      client:load
+      config={cierrePasantiaConfig}
+      initialRows={cierrePasantiaRows}
+      readOnly={!capabilities.canManageProcess}
+    />
+  </ListPageTemplate>
+</AppLayout>

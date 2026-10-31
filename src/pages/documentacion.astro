@@ -1,0 +1,82 @@
+---
+import DocumentWorkspace from '@/components/organisms/DocumentWorkspace';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { documentacionConfig, documentacionRows } from '@/lib/catalog/documentacion';
+import { TALLER_NOMBRES } from '@/lib/catalog/options';
+import {
+  assignedStudentNamesForTalleres,
+  defaultPlazaAssignments,
+} from '@/lib/catalog/plaza-assignments';
+import { pluralize } from '@/lib/format/text';
+import { capabilitiesFor, visibleTalleres } from '@/lib/ui/permissions';
+import { ROLE_LABELS } from '@/lib/ui/roles';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion');
+
+const capabilities = capabilitiesFor(user.role);
+const talleres = visibleTalleres(user.role, TALLER_NOMBRES, user.id);
+const assignmentScope = user.role === 'tutor-empresarial';
+const assignedStudentNames = assignmentScope
+  ? assignedStudentNamesForTalleres(defaultPlazaAssignments(), talleres)
+  : [];
+const assignedStudents = new Set(assignedStudentNames);
+// El alcance se aplica antes de enviar datos al navegador: un tutor nunca
+// recibe en el HTML documentos de talleres que no imparte y el tutor
+// empresarial solo recibe los estudiantes asignados a plazas de sus talleres.
+const scopedRows = documentacionRows.filter(
+  (row) =>
+    talleres.includes(String(row.taller)) &&
+    (!assignmentScope || assignedStudents.has(String(row.estudiante))),
+);
+const total = scopedRows.length;
+const description = assignmentScope
+  ? 'Consulta las entregas de los estudiantes asignados a las plazas de tus talleres.'
+  : talleres.length === 1
+    ? `Revisa los estudiantes y entregas de ${talleres[0]}.`
+    : 'Selecciona un taller y después un estudiante para revisar sus entregas.';
+const guidance = {
+  coordinador:
+    'Como coordinación puedes consultar, editar y validar la documentación de todos los talleres.',
+  vinculador:
+    'Como vinculador revisas, apruebas o rechazas la documentación de todos los estudiantes. Elige un taller y después un estudiante.',
+  tutor:
+    'Como tutor académico revisas, apruebas o rechazas la documentación de los estudiantes de tu taller.',
+  'tutor-empresarial':
+    'Como tutor empresarial consultas la documentación de los estudiantes asignados a las plazas de tus talleres. La validación corresponde a tutoría académica y vinculación.',
+  supervisor:
+    'Como supervisor institucional consultas la documentación organizada por taller y estudiante.',
+  estudiante:
+    'Como estudiante consultas y subes tus propios documentos desde «Mis documentos».',
+}[user.role];
+---
+
+<AppLayout user={user} title={documentacionConfig.plural} currentPath="/documentacion">
+  <ListPageTemplate
+    title={documentacionConfig.plural}
+    description={description}
+    count={
+      assignmentScope
+        ? undefined
+        : pluralize(total, 'documento', 'documentos')
+    }
+  >
+    <DocumentWorkspace
+      client:idle
+      initialRows={scopedRows}
+      canManage={capabilities.canManageDocuments}
+      canReview={capabilities.canReviewDocuments}
+      talleres={talleres}
+      roleLabel={ROLE_LABELS[user.role]}
+      guidance={guidance}
+      reviewerName={user.name}
+      partialSave={talleres.length < TALLER_NOMBRES.length || assignmentScope}
+      assignmentScope={assignmentScope}
+      assignedStudentNames={assignedStudentNames}
+      groupByPlaza={assignmentScope}
+    />
+  </ListPageTemplate>
+</AppLayout>

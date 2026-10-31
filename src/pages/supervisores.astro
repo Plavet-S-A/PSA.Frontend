@@ -1,0 +1,25 @@
+---
+import ResourceManager from '@/components/organisms/ResourceManager';
+import ListPageTemplate from '@/components/templates/ListPageTemplate.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { supervisoresConfig, supervisoresRows } from '@/lib/catalog/supervisores';
+import { capabilitiesFor } from '@/lib/ui/permissions';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion');
+
+const capabilities = capabilitiesFor(user.role);
+---
+
+<AppLayout user={user} title={supervisoresConfig.plural} currentPath="/supervisores">
+  <ListPageTemplate title={supervisoresConfig.plural} description={supervisoresConfig.description}>
+    <ResourceManager
+      client:idle
+      config={supervisoresConfig}
+      initialRows={supervisoresRows}
+      readOnly={!capabilities.canManageCatalogs}
+    />
+  </ListPageTemplate>
+</AppLayout>

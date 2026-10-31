@@ -1,0 +1,164 @@
+---
+import Badge from '@/components/atoms/Badge.astro';
+import Icon from '@/components/atoms/Icon.astro';
+import StatCard from '@/components/molecules/StatCard.astro';
+import PageHeader from '@/components/organisms/PageHeader.astro';
+import AppLayout from '@/layouts/AppLayout.astro';
+import { centrosTrabajoRows } from '@/lib/catalog/centros-trabajo';
+import { documentacionRows } from '@/lib/catalog/documentacion';
+import { estudiantesRows } from '@/lib/catalog/estudiantes';
+import { evaluacionRows } from '@/lib/catalog/evaluacion';
+import { plazasRows } from '@/lib/catalog/plazas';
+import { procesoPasantiaRows } from '@/lib/catalog/proceso-pasantia';
+import { supervisoresRows } from '@/lib/catalog/supervisores';
+import { talleresRows } from '@/lib/catalog/talleres';
+import { tutoresEmpresarialesRows } from '@/lib/catalog/tutores-empresariales';
+import { tutoresRows } from '@/lib/catalog/tutores';
+import { usuariosRows } from '@/lib/catalog/usuarios';
+import { vinculadoresRows } from '@/lib/catalog/vinculadores';
+import { formatLongDate } from '@/lib/format/date';
+import { pluralize } from '@/lib/format/text';
+import type { IconName } from '@/lib/ui/icons';
+import { hasPermission, type Permission } from '@/lib/ui/permissions';
+import { statusTone } from '@/lib/ui/status';
+
+export const prerender = false;
+
+const user = Astro.locals.user;
+if (!user) return Astro.redirect('/iniciar-sesion');
+// El panel es operativo para el personal; el estudiante aterriza en su resumen.
+if (user.role === 'estudiante') return Astro.redirect('/mi-pasantia');
+
+const today = formatLongDate(new Date());
+const activeStudents = estudiantesRows.filter((row) =>
+  ['Activo', 'En práctica'].includes(String(row.estado)),
+).length;
+const openPlazas = plazasRows.filter((row) => String(row.estado) === 'Abierta').length;
+const activeCenters = centrosTrabajoRows.filter((row) => String(row.estado) === 'Activo').length;
+const activeTutors = tutoresRows.filter((row) => String(row.estado) === 'Activo').length;
+const recentPlazas = plazasRows.slice(0, 5);
+
+interface ModuleLink {
+  href: string;
+  label: string;
+  hint: string;
+  count: number;
+  icon: IconName;
+  permission: Permission;
+}
+
+const allModules: readonly ModuleLink[] = [
+  { href: '/estudiantes', label: 'Estudiantes', hint: 'Expedientes y práctica', count: estudiantesRows.length, icon: 'graduation', permission: 'academic' },
+  { href: '/talleres', label: 'Talleres', hint: 'Formación complementaria', count: talleresRows.length, icon: 'book', permission: 'academic' },
+  { href: '/tutores', label: 'Tutores académicos', hint: 'Asignación académica', count: tutoresRows.length, icon: 'user-check', permission: 'academic' },
+  { href: '/centros-trabajo', label: 'Centros de trabajo', hint: 'Convenios y empresas', count: centrosTrabajoRows.length, icon: 'building', permission: 'companies' },
+  { href: '/plazas', label: 'Plazas', hint: 'Oportunidades activas', count: plazasRows.length, icon: 'layers', permission: 'companies' },
+  { href: '/tutores-empresariales', label: 'Tutores empresariales', hint: 'Enlace en la empresa', count: tutoresEmpresarialesRows.length, icon: 'briefcase', permission: 'companies' },
+  { href: '/vinculadores', label: 'Vinculadores', hint: 'Gestión universitaria', count: vinculadoresRows.length, icon: 'link', permission: 'staff' },
+  { href: '/supervisores', label: 'Supervisores', hint: 'Enlace institucional', count: supervisoresRows.length, icon: 'id-card', permission: 'staff' },
+  { href: '/usuarios', label: 'Usuarios', hint: 'Accesos y roles', count: usuariosRows.length, icon: 'users', permission: 'staff' },
+  { href: '/documentacion', label: 'Documentación', hint: 'Entregas por taller', count: documentacionRows.length, icon: 'file', permission: 'documents' },
+  { href: '/evaluacion', label: 'Evaluación', hint: 'Calificaciones', count: evaluacionRows.length, icon: 'chart', permission: 'evaluations' },
+  { href: '/proceso-pasantia', label: 'Proceso de pasantía', hint: 'Etapa y avance', count: procesoPasantiaRows.length, icon: 'route', permission: 'process' },
+];
+
+const modules = allModules.filter((module) => hasPermission(user.role, module.permission));
+const canSeeCompanies = hasPermission(user.role, 'companies');
+---
+
+<AppLayout user={user} title="Panel" currentPath="/panel">
+  <PageHeader title="Panel" description={`Resumen operativo · ${today}`} />
+
+  <section class="stat-grid" aria-label="Indicadores principales">
+    <StatCard
+      label="Estudiantes activos"
+      value={activeStudents}
+      meta={`${pluralize(estudiantesRows.length, 'registrado', 'registrados')}`}
+      icon="graduation"
+    />
+    <StatCard
+      label="Plazas abiertas"
+      value={openPlazas}
+      meta={`${pluralize(plazasRows.length, 'plaza', 'plazas')} en total`}
+      icon="layers"
+    />
+    <StatCard
+      label="Centros activos"
+      value={activeCenters}
+      meta={pluralize(centrosTrabajoRows.length, 'centro registrado', 'centros registrados')}
+      icon="building"
+    />
+    <StatCard
+      label="Tutores activos"
+      value={activeTutors}
+      meta={`${pluralize(tutoresRows.length, 'tutor', 'tutores')} en total`}
+      icon="user-check"
+    />
+  </section>
+
+  <div class:list={['dashboard-grid', { 'dashboard-grid--single': !canSeeCompanies }]}>
+    {canSeeCompanies && (
+      <section class="panel" aria-labelledby="recent-plazas-title">
+        <div class="panel__head">
+          <h2 class="panel__title" id="recent-plazas-title">Plazas recientes</h2>
+          <a class="panel__link" href="/plazas">Ver todas</a>
+        </div>
+        <div class="panel__body">
+          <div class="table-scroll" tabindex="0" role="region" aria-label="Plazas recientes">
+            <table class="data-table">
+              <caption class="psa-visually-hidden">Plazas recientes</caption>
+              <thead>
+                <tr>
+                  <th scope="col">Centro de trabajo</th>
+                  <th scope="col" class="data-table__col--optional">Edad mínima</th>
+                  <th scope="col" data-align="right">Cupos</th>
+                  <th scope="col">Estado</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentPlazas.map((plaza) => (
+                  <tr>
+                    <td>
+                      <div class="cell-primary">
+                        <span class="cell-primary__name">{plaza.centroTrabajo}</span>
+                        <span class="cell-primary__secondary">{plaza.taller}</span>
+                      </div>
+                    </td>
+                    <td class="data-table__col--optional">{plaza.edad_minima}</td>
+                    <td data-align="right">{plaza.cantidad}</td>
+                    <td>
+                      <Badge tone={statusTone(String(plaza.estado))}>{plaza.estado}</Badge>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="panel__foot">
+          <a class="panel__link" href="/plazas">Administrar plazas</a>
+        </div>
+      </section>
+    )}
+
+    <section class="panel" aria-labelledby="modules-title">
+      <div class="panel__head">
+        <h2 class="panel__title" id="modules-title">Módulos</h2>
+      </div>
+      <ul class="module-list">
+        {modules.map((module) => (
+          <li>
+            <a class="module-list__item" href={module.href}>
+              <span class="module-list__icon"><Icon name={module.icon} size={16} /></span>
+              <span class="module-list__text">
+                <span class="module-list__name">{module.label}</span>
+                <span class="module-list__hint">{module.hint}</span>
+              </span>
+              <span class="module-list__count">{module.count}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+  </div>
+</AppLayout>
