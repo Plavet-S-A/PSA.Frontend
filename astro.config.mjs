@@ -1,15 +1,13 @@
 // @ts-check
 import { fileURLToPath } from 'node:url';
 
-import node from '@astrojs/node';
 import solidJs from '@astrojs/solid-js';
 import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'astro/config';
 
-// El acceso y el área privada se renderizan en servidor: la sesión vive en una
-// cookie HttpOnly y nunca en el cliente.
+// Salida estática para GitHub Pages
 export default defineConfig({
-  adapter: node({ mode: 'standalone' }),
+  output: 'static',
   integrations: [solidJs()],
   security: {
     checkOrigin: true,
