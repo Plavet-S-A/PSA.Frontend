@@ -1,0 +1,138 @@
+---
+/**
+ * AppLayout — shell privado con sidebar, topbar y contenido.
+ *
+ * Capa: layout
+ * Props: user, title, currentPath, description
+ * Slots: default (contenido de la pantalla)
+ * Efectos: controla el drawer móvil y el foco del menú.
+ */
+import '@/styles/tokens.css';
+import '@/styles/base.css';
+import '@/styles/daisyui.css';
+import '@/styles/components.css';
+import '@/styles/shell.css';
+import '@/styles/dashboard.css';
+import '@/styles/workspace.css';
+import '@/styles/grading.css';
+
+import SidebarInit from '@/components/atoms/SidebarInit.astro';
+import ThemeInit from '@/components/atoms/ThemeInit.astro';
+import AppSidebar from '@/components/organisms/AppSidebar.astro';
+import AppTopbar from '@/components/organisms/AppTopbar.astro';
+import type { SessionUser } from '@/types/auth';
+
+interface Props {
+  /** Usuario autenticado. */
+  user: SessionUser;
+  /** Nombre de la pantalla actual. */
+  title: string;
+  /** Ruta actual para la navegación. */
+  currentPath: string;
+  /** Descripción para metadatos. */
+  description?: string;
+}
+
+const {
+  user,
+  title,
+  currentPath,
+  description = 'Plataforma de gestión de pasantías.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} · PSA</title>
+    <ThemeInit />
+    <SidebarInit />
+  </head>
+  <body>
+    <a class="skip-link" href="#contenido">Saltar al contenido</a>
+
+    <div class="app-shell" data-app-shell>
+      <AppSidebar user={user} currentPath={currentPath} />
+      <button
+        class="drawer-overlay"
+        type="button"
+        data-drawer-overlay
+        aria-label="Cerrar menú"
+        tabindex="-1"
+      ></button>
+
+      <div class="app-main">
+        <AppTopbar title={title} />
+        <main id="contenido" class="app-content" tabindex="-1">
+          <slot />
+        </main>
+      </div>
+    </div>
+
+    <script>
+      const shell = document.querySelector<HTMLElement>('[data-app-shell]');
+      const toggle = document.querySelector<HTMLButtonElement>('[data-drawer-toggle]');
+      const overlay = document.querySelector<HTMLButtonElement>('[data-drawer-overlay]');
+      const sidebar = document.querySelector<HTMLElement>('#app-sidebar');
+      const sidebarToggle = document.querySelector<HTMLButtonElement>('[data-sidebar-toggle]');
+      const root = document.documentElement;
+      let lastFocused: HTMLElement | null = null;
+
+      function syncSidebarToggle(): void {
+        if (!sidebarToggle) return;
+        const collapsed = root.dataset.sidebar === 'collapsed';
+        const label = collapsed ? 'Expandir menú lateral' : 'Contraer menú lateral';
+        sidebarToggle.setAttribute('aria-expanded', String(!collapsed));
+        sidebarToggle.setAttribute('aria-label', label);
+        sidebarToggle.setAttribute('title', label);
+      }
+
+      function toggleSidebar(): void {
+        const collapsed = root.dataset.sidebar === 'collapsed';
+        if (collapsed) {
+          delete root.dataset.sidebar;
+        } else {
+          root.dataset.sidebar = 'collapsed';
+        }
+        try {
+          localStorage.setItem('psa-sidebar', collapsed ? 'expanded' : 'collapsed');
+        } catch {
+          /* La preferencia es opcional; el menú sigue funcionando. */
+        }
+        syncSidebarToggle();
+      }
+
+      function openDrawer(): void {
+        if (!shell) return;
+        const focused = document.activeElement;
+        lastFocused =
+          focused instanceof HTMLElement && focused !== document.body ? focused : toggle;
+        shell.setAttribute('data-drawer-open', 'true');
+        toggle?.setAttribute('aria-expanded', 'true');
+        queueMicrotask(() => sidebar?.querySelector<HTMLAnchorElement>('.nav-item')?.focus());
+      }
+
+      function closeDrawer(): void {
+        if (!shell?.hasAttribute('data-drawer-open')) return;
+        shell.removeAttribute('data-drawer-open');
+        toggle?.setAttribute('aria-expanded', 'false');
+        (lastFocused ?? toggle)?.focus();
+      }
+
+      toggle?.addEventListener('click', openDrawer);
+      overlay?.addEventListener('click', closeDrawer);
+      sidebarToggle?.addEventListener('click', toggleSidebar);
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape') closeDrawer();
+      });
+      sidebar?.querySelectorAll('a').forEach((link) => {
+        link.addEventListener('click', closeDrawer);
+      });
+      syncSidebarToggle();
+    </script>
+  </body>
+</html>

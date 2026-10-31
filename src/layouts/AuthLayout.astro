@@ -1,0 +1,61 @@
+---
+/**
+ * AuthLayout — shell de las pantallas públicas de acceso.
+ *
+ * Capa: layout
+ * Props: title, description
+ * Slots: default (formulario)
+ * Efectos: ninguno; el tema se aplica antes del primer pintado.
+ */
+import '@/styles/tokens.css';
+import '@/styles/base.css';
+import '@/styles/daisyui.css';
+import '@/styles/components.css';
+import '@/styles/auth.css';
+
+import Brand from '@/components/atoms/Brand.astro';
+import ThemeInit from '@/components/atoms/ThemeInit.astro';
+import ThemeToggle from '@/components/atoms/ThemeToggle.astro';
+
+interface Props {
+  /** Título de la tarjeta. */
+  title: string;
+  /** Descripción de la tarjeta. */
+  description: string;
+}
+
+const { title, description } = Astro.props;
+const year = new Date().getFullYear();
+---
+
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title} · PSA</title>
+    <ThemeInit />
+  </head>
+  <body>
+    <main class="auth">
+      <div class="auth__theme">
+        <ThemeToggle />
+      </div>
+
+      <section class="auth__card" aria-labelledby="auth-title">
+        <div class="auth__brand">
+          <Brand href="/iniciar-sesion" />
+        </div>
+        <h1 id="auth-title" class="auth__title">{title}</h1>
+        <p class="auth__description">{description}</p>
+        <slot />
+        <footer class="auth__footer">
+          <span>© {year} PSA</span>
+          <a href="mailto:soporte@psa.mx">soporte@psa.mx</a>
+        </footer>
+      </section>
+    </main>
+  </body>
+</html>
