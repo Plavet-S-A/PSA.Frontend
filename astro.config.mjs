@@ -3,11 +3,13 @@ import { fileURLToPath } from 'node:url';
 
 import solidJs from '@astrojs/solid-js';
 import tailwindcss from '@tailwindcss/vite';
+import vercel from '@astrojs/vercel';
 import { defineConfig } from 'astro/config';
 
-// Salida estática para GitHub Pages
+// Configuración para Vercel con renderizado híbrido
 export default defineConfig({
-  output: 'static',
+  adapter: vercel(),
+  output: 'server',
   integrations: [solidJs()],
   security: {
     checkOrigin: true,
