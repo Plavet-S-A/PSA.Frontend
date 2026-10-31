@@ -1,0 +1,73 @@
+---
+/**
+ * ThemeToggle — alterna entre tema claro y oscuro.
+ *
+ * Capa: atom
+ * Props: class
+ * Efectos: guarda la preferencia en localStorage (solo el tema, nunca sesión).
+ */
+import Icon from '@/components/atoms/Icon.astro';
+
+interface Props {
+  /** Clases del consumidor. */
+  class?: string;
+}
+
+const { class: className } = Astro.props;
+---
+
+<button
+  class:list={['btn', 'btn-ghost', 'btn-square', className]}
+  type="button"
+  data-theme-toggle
+  aria-label="Cambiar tema"
+  title="Cambiar tema"
+>
+  <span class="theme-toggle__sun"><Icon name="sun" size={18} /></span>
+  <span class="theme-toggle__moon"><Icon name="moon" size={18} /></span>
+</button>
+
+<style>
+  .theme-toggle__sun {
+    display: none;
+  }
+
+  :global([data-theme='dark']) .theme-toggle__sun {
+    display: block;
+  }
+
+  :global([data-theme='dark']) .theme-toggle__moon {
+    display: none;
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = 'psa-theme';
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]');
+
+  const labelFor = (theme: string) =>
+    theme === 'dark' ? 'Cambiar a tema claro' : 'Cambiar a tema oscuro';
+
+  const sync = (theme: string) => {
+    for (const button of buttons) {
+      button.setAttribute('aria-label', labelFor(theme));
+      button.setAttribute('title', labelFor(theme));
+    }
+  };
+
+  const current = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  sync(current);
+
+  for (const button of buttons) {
+    button.addEventListener('click', () => {
+      const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+      document.documentElement.dataset.theme = next;
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        /* La preferencia no se persiste, pero el tema sí cambia. */
+      }
+      sync(next);
+    });
+  }
+</script>

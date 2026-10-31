@@ -1,0 +1,76 @@
+---
+/**
+ * Button — acción o enlace con la jerarquía visual del sistema.
+ *
+ * Capa: atom
+ * Props: href, variant, size, type, disabled, block, iconOnly, form, ariaLabel,
+ * title, class
+ * Slots: default (contenido)
+ * Efectos: ninguno.
+ */
+import { buttonVariantClass } from '@/lib/ui/daisy';
+import type { ButtonSize, ButtonVariant } from '@/lib/ui/daisy';
+
+interface Props {
+  /** Si existe, renderiza un enlace con el mismo estilo. */
+  href?: string;
+  /** Jerarquía visual. Default: secondary. */
+  variant?: ButtonVariant;
+  /** Altura del control. Default: md. */
+  size?: ButtonSize;
+  /** Tipo del botón nativo. Default: button. */
+  type?: 'button' | 'submit' | 'reset';
+  /** Deshabilita el botón. */
+  disabled?: boolean;
+  /** Ocupa todo el ancho disponible. */
+  block?: boolean;
+  /** Cuadrado, para un icono con etiqueta accesible. */
+  iconOnly?: boolean;
+  /** Formulario asociado cuando el botón vive fuera de él. */
+  form?: string;
+  /** Etiqueta accesible cuando el contenido es solo un icono. */
+  ariaLabel?: string;
+  /** Texto de ayuda nativo. */
+  title?: string;
+  /** Clases del consumidor. */
+  class?: string;
+}
+
+const {
+  href,
+  variant = 'secondary',
+  size = 'md',
+  type = 'button',
+  disabled = false,
+  block = false,
+  iconOnly = false,
+  form,
+  ariaLabel,
+  title,
+  class: className,
+} = Astro.props;
+
+const classes = [
+  'btn',
+  buttonVariantClass(variant),
+  { 'btn-sm': size === 'sm', 'btn-lg': size === 'lg', 'btn-block': block, 'btn-square': iconOnly },
+  className,
+];
+---
+
+{href ? (
+  <a class:list={classes} href={href} aria-label={ariaLabel} title={title}>
+    <slot />
+  </a>
+) : (
+  <button
+    class:list={classes}
+    type={type}
+    disabled={disabled}
+    form={form}
+    aria-label={ariaLabel}
+    title={title}
+  >
+    <slot />
+  </button>
+)}

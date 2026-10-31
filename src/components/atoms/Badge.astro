@@ -1,0 +1,26 @@
+---
+/**
+ * Badge — indicador compacto de estado.
+ *
+ * Capa: atom
+ * Props: tone, class
+ * Slots: default (texto del estado)
+ * Efectos: ninguno.
+ */
+import { badgeToneClass } from '@/lib/ui/daisy';
+import type { StatusTone } from '@/lib/ui/status';
+
+interface Props {
+  /** Tono semántico. Default: neutral. */
+  tone?: StatusTone;
+  /** Clases del consumidor. */
+  class?: string;
+}
+
+const { tone = 'neutral', class: className } = Astro.props;
+---
+
+<span class:list={['badge', badgeToneClass(tone), className]}>
+  <span class="badge__dot" aria-hidden="true"></span>
+  <slot />
+</span>

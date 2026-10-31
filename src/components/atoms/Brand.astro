@@ -1,0 +1,29 @@
+---
+/**
+ * Brand — marca de PSA con monograma y wordmark.
+ *
+ * Capa: atom
+ * Props: href, compact, class
+ * Efectos: ninguno.
+ */
+interface Props {
+  /** Destino del enlace. Default: /panel. */
+  href?: string;
+  /** Muestra solo el monograma. */
+  compact?: boolean;
+  /** Clases del consumidor. */
+  class?: string;
+}
+
+const { href = '/panel', compact = false, class: className } = Astro.props;
+---
+
+<a class:list={['brand', className]} href={href} aria-label="PSA, gestión de pasantías">
+  <span class="brand__mark" aria-hidden="true">P</span>
+  {!compact && (
+    <span class="brand__text">
+      <span class="brand__name">PSA</span>
+      <span class="brand__tagline">Gestión de pasantías</span>
+    </span>
+  )}
+</a>

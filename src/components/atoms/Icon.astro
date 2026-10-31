@@ -1,0 +1,42 @@
+---
+/**
+ * Icon — icono SVG del sistema.
+ *
+ * Capa: atom
+ * Props: name, size, label, class
+ * Efectos: ninguno.
+ */
+import { ICON_PATHS, type IconName } from '@/lib/ui/icons';
+
+interface Props {
+  /** Nombre semántico del icono. */
+  name: IconName;
+  /** Tamaño en píxeles. Default: 18. */
+  size?: 16 | 18 | 20 | 24;
+  /** Texto accesible; si falta, el icono se oculta a lectores. */
+  label?: string;
+  /** Clases del consumidor. */
+  class?: string;
+}
+
+const { name, size = 18, label, class: className } = Astro.props;
+const paths = ICON_PATHS[name];
+---
+
+<svg
+  class:list={['icon', `icon--${size}`, className]}
+  viewBox="0 0 24 24"
+  width={size}
+  height={size}
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+>
+  {paths.map((path) => <path d={path} />)}
+</svg>

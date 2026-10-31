@@ -1,0 +1,13 @@
+---
+/**
+ * SidebarInit — aplica el estado compacto del menú antes del primer pintado.
+ *
+ * Capa: atom
+ * Props: ninguno
+ * Efectos: carga `public/sidebar-init.js`; solo lee una preferencia de
+ * interfaz, nunca la sesión.
+ */
+---
+
+<!-- Se mantiene externo para no necesitar hashes inline en la CSP. -->
+<script is:inline src="/sidebar-init.js"></script>

@@ -1,0 +1,12 @@
+---
+/**
+ * ThemeInit — aplica el tema antes del primer pintado.
+ *
+ * Capa: atom
+ * Props: ninguno
+ * Efectos: carga `public/theme-init.js`; solo lee el tema, nunca la sesión.
+ */
+---
+
+<!-- Se mantiene externo para no necesitar hashes inline en la CSP. -->
+<script is:inline src="/theme-init.js"></script>
