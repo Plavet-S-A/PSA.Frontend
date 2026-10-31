@@ -1,0 +1,46 @@
+---
+/**
+ * ComponentName — una frase que explique qué hace y para qué existe.
+ *
+ * Capa: atom | molecule | organism | template
+ * Props: label, variant, class
+ * Slots: default (contenido)
+ * Efectos: ninguno.
+ *
+ * Ejemplo:
+ *   <ComponentName label="Guardar" variant="primary">…</ComponentName>
+ */
+interface Props {
+  /** Texto visible. */
+  label: string;
+  /** Variante visual. Default: primary. */
+  variant?: 'primary' | 'secondary';
+  /** Clases del consumidor; se suman a las del componente. */
+  class?: string;
+}
+
+const { label, variant = 'primary', class: className } = Astro.props;
+---
+
+<div class:list={['component', `component--${variant}`, className]}>
+  <div class="component__label"><slot>{label}</slot></div>
+</div>
+
+<style>
+  .component {
+    padding: var(--space-3);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-size: var(--text-base);
+  }
+
+  .component--secondary {
+    background: var(--bg-subtle);
+  }
+
+  .component__label {
+    font-weight: var(--weight-medium);
+  }
+</style>
