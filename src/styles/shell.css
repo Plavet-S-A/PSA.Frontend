@@ -27,7 +27,7 @@
   height: var(--topbar-h);
   padding: 0 var(--space-4);
   border-bottom: 1px solid var(--border-color);
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg-subtle) 100%);
 }
 
 .sidebar__nav {

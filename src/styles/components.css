@@ -153,7 +153,8 @@
   overflow: hidden;
   border: 1px solid var(--border-color);
   border-radius: var(--radius);
-  background: var(--surface);
+  background: linear-gradient(180deg, var(--surface) 0%, var(--bg-subtle) 100%);
+  box-shadow: 0 2px 12px rgba(18,22,26,0.04);
 }
 
 .table-scroll {
