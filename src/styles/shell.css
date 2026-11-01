@@ -5,7 +5,7 @@
 
 .app-shell {
   min-height: 100vh;
-  background: var(--bg-subtle);
+  background: linear-gradient(180deg, var(--bg-subtle) 0%, var(--bg) 100%);
 }
 
 .sidebar {
