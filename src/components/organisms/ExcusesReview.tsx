@@ -11,6 +11,7 @@ import { createMemo, createSignal, For, onMount, Show } from 'solid-js';
 
 import Badge from '@/components/atoms/Badge';
 import Button from '@/components/atoms/Button';
+import Icon from '@/components/atoms/Icon';
 import Alert from '@/components/molecules/Alert';
 import ConfirmDialog from '@/components/molecules/ConfirmDialog';
 import EmptyState from '@/components/molecules/EmptyState';
@@ -205,8 +206,10 @@ export const ExcusesReview: Component<ExcusesReviewProps> = (props) => {
                             size="sm"
                             onClick={() => setDetailRow(row)}
                             aria-label={`Ver excusa de ${row.estudiante}`}
+                            title="Ver excusa"
                           >
-                            Ver
+                            <Icon name="eye" size={18} />
+                            <span class="psa-visually-hidden">Ver</span>
                           </Button>
                           <Show when={canResolve(row)}>
                             <Button
