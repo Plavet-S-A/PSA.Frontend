@@ -11,6 +11,7 @@ import { createMemo, createSignal, For, onMount, Show } from 'solid-js';
 
 import Badge from '@/components/atoms/Badge';
 import Button from '@/components/atoms/Button';
+import Icon from '@/components/atoms/Icon';
 import EmptyState from '@/components/molecules/EmptyState';
 import Toast from '@/components/molecules/Toast';
 import DocumentPdfViewer from '@/components/organisms/DocumentPdfViewer';
@@ -127,6 +128,29 @@ export const StudentDocuments: Component<StudentDocumentsProps> = (props) => {
         </Button>
       </div>
 
+      {/* Lista de documentos requeridos para el estudiante */}
+      <div class="doc-requirements">
+        <h3 class="doc-requirements__title">Documentos requeridos</h3>
+        <ul class="doc-requirements__list">
+          <For each={props.tipos}>
+            {(tipo) => {
+              const uploaded = ownRows().some(r => r.tipo === tipo);
+              return (
+                <li class={`doc-requirements__item ${uploaded ? 'is-uploaded' : ''}`}>
+                  <span class="doc-requirements__icon" aria-hidden="true">
+                    {uploaded ? '✓' : '○'}
+                  </span>
+                  <span class="doc-requirements__label">{tipo}</span>
+                  <Badge tone={uploaded ? 'success' : 'info'}>
+                    {uploaded ? 'Recibido' : 'Pendiente'}
+                  </Badge>
+                </li>
+              );
+            }}
+          </For>
+        </ul>
+      </div>
+
       <Show
         when={ownRows().length > 0}
         fallback={
@@ -180,8 +204,10 @@ export const StudentDocuments: Component<StudentDocumentsProps> = (props) => {
                           size="sm"
                           onClick={() => setDetailRow(row)}
                           aria-label={`Ver ${row.tipo}`}
+                          title="Ver documento"
                         >
-                          Ver
+                          <Icon name="eye" size={18} />
+                          <span class="psa-visually-hidden">Ver</span>
                         </Button>
                       </td>
                     </tr>
