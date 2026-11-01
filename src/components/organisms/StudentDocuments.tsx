@@ -139,7 +139,8 @@ export const StudentDocuments: Component<StudentDocumentsProps> = (props) => {
             <span class="doc-summary__progress-value">
               {(() => {
                 const total = props.tipos.length;
-                const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t)).length;
+                const isReady = (r: typeof ownRows extends () => infer T ? T[number] : never) => ['Recibido','Validado'].includes(String(r.estado));
+                const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t && isReady(r))).length;
                 const pct = total ? Math.round((done / total) * 100) : 0;
                 return `${done}/${total} · ${pct}%`;
               })()}
@@ -148,14 +149,16 @@ export const StudentDocuments: Component<StudentDocumentsProps> = (props) => {
         </div>
         <div class="doc-summary__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progreso de documentos" aria-valuenow={(() => {
             const total = props.tipos.length || 1;
-            const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t)).length;
+            const isReady = (r: any) => ['Recibido','Validado'].includes(String(r.estado));
+            const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t && isReady(r))).length;
             return Math.round((done / total) * 100);
           })()}>
           <div
             class="doc-summary__bar-fill"
             style={`width: ${(() => {
               const total = props.tipos.length || 1;
-              const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t)).length;
+              const isReady = (r: any) => ['Recibido','Validado'].includes(String(r.estado));
+              const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t && isReady(r))).length;
               return `${Math.round((done / total) * 100)}%`;
             })()}`}
           />
@@ -163,7 +166,8 @@ export const StudentDocuments: Component<StudentDocumentsProps> = (props) => {
         <ul class="doc-summary__chips">
           <For each={props.tipos}>
             {(tipo) => {
-              const uploaded = ownRows().some(r => r.tipo === tipo);
+              const isReady = (r: any) => ['Recibido','Validado'].includes(String(r.estado));
+              const uploaded = ownRows().some(r => r.tipo === tipo && isReady(r));
               return (
                 <li class={`doc-chip ${uploaded ? 'is-uploaded' : 'is-pending'}`}>
                   <span class="doc-chip__icon" aria-hidden="true">
