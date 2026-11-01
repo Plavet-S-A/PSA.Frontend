@@ -1593,11 +1593,17 @@
   font-weight: var(--weight-medium);
 }
 
-/* Modal animation fix */
+/* Modal base */
+.modal {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
 .modal[open] {
   animation: modal-in var(--duration-base) var(--ease-out);
 }
 .modal::backdrop {
+  background: var(--scrim);
   animation: backdrop-in var(--duration-base) var(--ease-out);
 }
 @keyframes modal-in {
