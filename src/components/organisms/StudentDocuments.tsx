@@ -128,22 +128,43 @@ export const StudentDocuments: Component<StudentDocumentsProps> = (props) => {
         </Button>
       </div>
 
-      {/* Lista de documentos requeridos para el estudiante */}
-      <div class="doc-requirements">
-        <h3 class="doc-requirements__title">Documentos requeridos</h3>
-        <ul class="doc-requirements__list">
+      {/* Resumen dinámico de documentos requeridos */}
+      <div class="doc-summary">
+        <div class="doc-summary__head">
+          <div>
+            <h3 class="doc-summary__title">Documentos requeridos</h3>
+            <p class="doc-summary__subtitle">Completa tu expediente para que tu tutor pueda dar seguimiento</p>
+          </div>
+          <div class="doc-summary__progress">
+            <span class="doc-summary__progress-value">
+              {(() => {
+                const total = props.tipos.length;
+                const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t)).length;
+                return `${done}/${total}`;
+              })()}
+            </span>
+          </div>
+        </div>
+        <div class="doc-summary__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progreso de documentos">
+          <div
+            class="doc-summary__bar-fill"
+            style={`width: ${(() => {
+              const total = props.tipos.length || 1;
+              const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t)).length;
+              return `${Math.round((done / total) * 100)}%`;
+            })()}`}
+          />
+        </div>
+        <ul class="doc-summary__chips">
           <For each={props.tipos}>
             {(tipo) => {
               const uploaded = ownRows().some(r => r.tipo === tipo);
               return (
-                <li class={`doc-requirements__item ${uploaded ? 'is-uploaded' : ''}`}>
-                  <span class="doc-requirements__icon" aria-hidden="true">
-                    {uploaded ? '✓' : '○'}
+                <li class={`doc-chip ${uploaded ? 'is-uploaded' : 'is-pending'}`}>
+                  <span class="doc-chip__icon" aria-hidden="true">
+                    <Icon name={uploaded ? 'check' : 'circle'} size={14} />
                   </span>
-                  <span class="doc-requirements__label">{tipo}</span>
-                  <Badge tone={uploaded ? 'success' : 'info'}>
-                    {uploaded ? 'Recibido' : 'Pendiente'}
-                  </Badge>
+                  <span class="doc-chip__label">{tipo}</span>
                 </li>
               );
             }}
