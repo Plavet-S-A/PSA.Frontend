@@ -140,12 +140,17 @@ export const StudentDocuments: Component<StudentDocumentsProps> = (props) => {
               {(() => {
                 const total = props.tipos.length;
                 const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t)).length;
-                return `${done}/${total}`;
+                const pct = total ? Math.round((done / total) * 100) : 0;
+                return `${done}/${total} · ${pct}%`;
               })()}
             </span>
           </div>
         </div>
-        <div class="doc-summary__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progreso de documentos">
+        <div class="doc-summary__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progreso de documentos" aria-valuenow={(() => {
+            const total = props.tipos.length || 1;
+            const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t)).length;
+            return Math.round((done / total) * 100);
+          })()}>
           <div
             class="doc-summary__bar-fill"
             style={`width: ${(() => {
