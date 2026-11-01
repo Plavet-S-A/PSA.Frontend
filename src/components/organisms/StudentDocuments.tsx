@@ -130,55 +130,26 @@ export const StudentDocuments: Component<StudentDocumentsProps> = (props) => {
 
       {/* Resumen dinámico de documentos requeridos */}
       <div class="doc-summary">
-        <div class="doc-summary__head">
-          <div>
-            <h3 class="doc-summary__title">Documentos requeridos</h3>
-            <p class="doc-summary__subtitle">Completa tu expediente para que tu tutor pueda dar seguimiento</p>
-          </div>
-          <div class="doc-summary__progress">
-            <span class="doc-summary__progress-value">
-              {(() => {
-                const total = props.tipos.length;
-                const isReady = (r: typeof ownRows extends () => infer T ? T[number] : never) => ['Recibido','Validado'].includes(String(r.estado));
-                const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t && isReady(r))).length;
-                const pct = total ? Math.round((done / total) * 100) : 0;
-                return `${done}/${total} · ${pct}%`;
-              })()}
-            </span>
-          </div>
+        <div class="doc-summary">
+          <h3 class="doc-summary__title">Documentos requeridos</h3>
+          <p class="doc-summary__subtitle">Sube los siguientes documentos para completar tu expediente</p>
+          <ul class="doc-summary__chips">
+            <For each={props.tipos}>
+              {(tipo) => {
+                const isReady = (r: any) => ['Recibido','Validado'].includes(String(r.estado));
+                const uploaded = ownRows().some(r => r.tipo === tipo && isReady(r));
+                return (
+                  <li class={`doc-chip ${uploaded ? 'is-uploaded' : 'is-pending'}`}>
+                    <span class="doc-chip__icon" aria-hidden="true">
+                      <Icon name={uploaded ? 'check' : 'circle'} size={14} />
+                    </span>
+                    <span class="doc-chip__label">{tipo}</span>
+                  </li>
+                );
+              }}
+            </For>
+          </ul>
         </div>
-        <div class="doc-summary__bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Progreso de documentos" aria-valuenow={(() => {
-            const total = props.tipos.length || 1;
-            const isReady = (r: any) => ['Recibido','Validado'].includes(String(r.estado));
-            const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t && isReady(r))).length;
-            return Math.round((done / total) * 100);
-          })()}>
-          <div
-            class="doc-summary__bar-fill"
-            style={`width: ${(() => {
-              const total = props.tipos.length || 1;
-              const isReady = (r: any) => ['Recibido','Validado'].includes(String(r.estado));
-              const done = props.tipos.filter(t => ownRows().some(r => r.tipo === t && isReady(r))).length;
-              return `${Math.round((done / total) * 100)}%`;
-            })()}`}
-          />
-        </div>
-        <ul class="doc-summary__chips">
-          <For each={props.tipos}>
-            {(tipo) => {
-              const isReady = (r: any) => ['Recibido','Validado'].includes(String(r.estado));
-              const uploaded = ownRows().some(r => r.tipo === tipo && isReady(r));
-              return (
-                <li class={`doc-chip ${uploaded ? 'is-uploaded' : 'is-pending'}`}>
-                  <span class="doc-chip__icon" aria-hidden="true">
-                    <Icon name={uploaded ? 'check' : 'circle'} size={14} />
-                  </span>
-                  <span class="doc-chip__label">{tipo}</span>
-                </li>
-              );
-            }}
-          </For>
-        </ul>
       </div>
 
       <Show
