@@ -1604,6 +1604,8 @@
 }
 .modal::backdrop {
   background: var(--scrim);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   animation: backdrop-in var(--duration-base) var(--ease-out);
 }
 @keyframes modal-in {
